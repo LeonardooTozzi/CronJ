@@ -1,0 +1,9 @@
+const express = require('express')
+
+const app = express()
+app.use(express.json())
+
+app.listen(30000, () => {
+    console.log("CronService is running...")
+    console.log('Server is listening on port 30000')
+})
