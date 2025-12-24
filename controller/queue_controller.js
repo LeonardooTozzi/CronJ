@@ -1,20 +1,23 @@
 const { Kafka } = require('kafkajs')
+const logger = require('logger')
 
 class QueueController {
 
     constructor() {
 
-        const brokersEnv = process.env.KAFKA_BROKERS || 'kafka1:9092,kafka2:9092'
+        const brokersEnv = process.env.KAFKA_BROKERS || 'localhost:9092'
         const brokers = brokersEnv.split(',').map(b => b.trim())
 
         this.kafka = new Kafka({
             clientId: process.env.KAFKA_CLIENT_ID || 'my-app',
             brokers,
-            connectionTimeout: parseInt(process.env.KAFKA_CONNECTION_TIMEOUT || '3000', 10),
-            requestTimeout: parseInt(process.env.KAFKA_REQUEST_TIMEOUT || '25000', 10),
+            connectionTimeout: parseInt(process.env.KAFKA_CONNECTION_TIMEOUT || '10000', 10),
+            requestTimeout: parseInt(process.env.KAFKA_REQUEST_TIMEOUT || '30000', 10),
             retry: {
-                initialRetryTime: 300,
-                retries: parseInt(process.env.KAFKA_RETRIES || '5', 10),
+                initialRetryTime: 100,
+                retries: parseInt(process.env.KAFKA_RETRIES || '8', 10),
+                multiplier: 2,
+                maxRetryTime: 30000,
             },
         })
 
@@ -33,7 +36,7 @@ class QueueController {
 
     }
 
-    async SendToQueue(topic, processData) {
+    async SendToQueue(topic, processData, retries = 3) {
 
         try {
 
@@ -76,10 +79,13 @@ class QueueController {
         } catch (error) {
 
             console.error(`Error consuming from Kafka topic="${topic}"`, error)
+            logger.error(`Error consuming from Kafka topic="${topic}"`, error)
+
             try {
                 await consumer.disconnect()
             } catch (dErr) {
                 console.error('Error disconnecting consumer after failure', dErr)
+                logger.error('Error disconnecting consumer after failure', dErr)
             }
             throw error
         }

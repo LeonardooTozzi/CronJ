@@ -1,9 +1,13 @@
 class Tracker {
 
     constructor() {
+        // Use singleton pattern - share the same Map across all instances
+        if (Tracker.instance) {
+            return Tracker.instance
+        }
 
         this.trackedJobs = new Map()
-        
+        Tracker.instance = this
     }
 
     TrackJob(jobId, jobDetails) {

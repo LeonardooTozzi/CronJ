@@ -7,10 +7,23 @@ router.get('/ping', (req, res) => {
 
 })
 
-router.post('/new_job', async (req, res) => {
+router.post('/', async (req, res) => {
 
     const cronController = new CronController()
     await cronController.CreateCronJob(req, res)
+    
+})
+
+router.get('/', async (req, res) => {
+
+    const cronController = new CronController()
+    
+    // If query has 'id', get specific job, otherwise list all
+    if (req.query && req.query.id) {
+        await cronController.GetCronJob(req, res)
+    } else {
+        await cronController.ListCronJobs(req, res)
+    }
     
 })
 
