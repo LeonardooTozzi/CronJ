@@ -2,3 +2,4 @@
 package-lock.json
 /scripts
 .env.example
+/ENHANCEMENT_PLAN.md

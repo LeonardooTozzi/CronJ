@@ -4,10 +4,20 @@ class CronService {
  
     constructor(data) {
 
-        this.id = data.id
+        
         this.cronExpression = data.cronExpression
         this.task = data.task
-        this.createdAt = data.createdAt
+        this.metadata = data.metadata
+
+        // {
+        //     "id": "job-uuid-123",
+        //     "name": "Daily Report",
+        //     "cronExpression": "0 9 * * *",
+        //     "status": "scheduled",
+        //     "createdAt": "2025-12-23T18:30:00Z",
+        //     "nextExecution": "2025-12-24T09:00:00Z",
+        //     "metadata": { ... }
+        // }
 
     }
 
@@ -16,10 +26,9 @@ class CronService {
         try {
 
             const cronJob = {
-                id: this.id,
                 cronExpression: this.cronExpression,
                 task: this.task,
-                createdAt: this.createdAt
+                metadata: this.metadata,
             };
 
             cron.schedule(this.cronExpression, () => {

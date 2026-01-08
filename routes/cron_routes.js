@@ -18,7 +18,6 @@ router.get('/', async (req, res) => {
 
     const cronController = new CronController()
     
-    // If query has 'id', get specific job, otherwise list all
     if (req.query && req.query.id) {
         await cronController.GetCronJob(req, res)
     } else {

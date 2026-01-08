@@ -2,6 +2,8 @@ const Tracker = require('../utils/tracker');
 const CronService = require('../services/cron_service');
 const QueueController = require('./queue_controller');
 const CronModel = require('../model/cron_model');
+const DaoKnex = require('../utils/Knex');
+const CONSTANTS = require('../utils/constants');
 
 class CronController {  
 
@@ -10,6 +12,7 @@ class CronController {
         this.JobTracker = new Tracker()
         this.QueueController = new QueueController()
         this.CronModel = new CronModel()
+        this.DaoKnex = new DaoKnex()
 
     }
 
@@ -17,35 +20,42 @@ class CronController {
 
         let data = req.body
         
-        this.DaoKnex = await this.DaoKnex.StartTransaction()
+        let transaction  = await this.DaoKnex.StartTransaction()
         
         try {
 
             let cronService = new CronService(data)
 
-            let cronJob = await cronService.CreateCronJob()
+            let result = await this.CronModel.CreateCronJob(data)
 
-            await this.CronModel.CreateCronJob(cronJob)
-
-            // Track job in memory
+            let dataset = {
+                id: result.lastInsertRowid,
+                name: data.name,
+                cronExpression: data.cronExpression,
+                task: data.task,
+                metadata: data.metadata,
+                status: 'scheduled',
+                createdAt: new Date(),
+                nextExecution: new Date(),
+            }
+            
+            let cronJob = await cronService.CreateCronJob(dataset)
+            
             this.JobTracker.TrackJob(cronJob.id, cronJob)
 
-            // Send to queue (fire and forget, but await to catch errors)
             await this.QueueController.SendToQueue('cron_jobs', JSON.stringify(cronJob))
 
-            // Commit transaction on success
             await this.DaoKnex.Commit(transaction)
 
             res.status(201).json(cronJob)
 
         } catch (error) {
 
-            await this.DaoKnex.Rollback()
+            await this.DaoKnex.Rollback(transaction)
             res.status(500).json({ error: error.message })
 
         }finally {
 
-            await this.DaoKnex.Commit()
 
         }
 

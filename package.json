@@ -8,17 +8,19 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "migrate:latest": "knex migrate:latest --knexfile knexfile.js",
-    "migrate:rollback": "knex migrate:rollback --knexfile knexfile.js",
-    "migrate:make": "knex migrate:make --knexfile knexfile.js",
-    "migrate:status": "knex migrate:status --knexfile knexfile.js"
+    "migrate:latest": "knex migrate:latest --knexfile config/knexfile.js",
+    "migrate:rollback": "knex migrate:rollback --knexfile config/knexfile.js",
+    "migrate:make": "knex migrate:make --knexfile config/knexfile.js",
+    "migrate:status": "knex migrate:status --knexfile config/knexfile.js"
   },
   "dependencies": {
+    "better-sqlite3": "^12.5.0",
     "dotenv": "^16.0.3",
     "express": "^5.2.1",
     "kafkajs": "^2.0.0",
     "knex": "^3.1.0",
     "logger": "^0.0.1",
-    "node-cron": "^3.0.2"
+    "node-cron": "^3.0.2",
+    "sqlite3": "^5.1.7"
   }
 }
